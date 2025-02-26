@@ -1,5 +1,6 @@
 import os
 import sys
+import multiprocessing
 from async_worker import AsyncWorker
 
 class VADWorker(AsyncWorker):
