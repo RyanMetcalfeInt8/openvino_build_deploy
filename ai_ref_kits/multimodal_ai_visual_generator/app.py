@@ -521,7 +521,7 @@ def main():
     app = QApplication(sys.argv)
     core = ov.Core()
 
-    llm_device = "NPU" if "NPU" in core.available_devices else "CPU"
+    llm_device = "GPU" if "GPU" in core.available_devices else "CPU"
     sd_device = "GPU" if "GPU" in core.available_devices else "CPU"
     whisper_device = 'CPU'
     super_res_device = "GPU" if "GPU" in core.available_devices else "CPU"
