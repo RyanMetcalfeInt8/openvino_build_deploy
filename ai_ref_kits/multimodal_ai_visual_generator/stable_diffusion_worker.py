@@ -1,7 +1,7 @@
 from async_worker import AsyncWorker
 from queue import Empty   
 from multiprocessing import Queue
-from queue import Empty
+
 from PIL import Image
 import cv2
 import numpy as np
@@ -32,7 +32,6 @@ class StableDiffusionWorker(AsyncWorker):
         self.super_res_device = super_res_device
         
     def _work_loop(self):
-        
         import openvino_genai as ov_genai
         
         print("Creating a stable diffusion pipeline to run on ", self.sd_device)
