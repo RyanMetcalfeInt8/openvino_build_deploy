@@ -143,7 +143,10 @@ class LLMWorker(AsyncWorker):
             try:
                 #self.progress_updated.emit(0, "listening")
                 
-                result = self.transcription_queue.get(timeout=1)
+                # Each queue entry is a tuple:
+                # (start_time_in_seconds, segment_length_in_seconds, transcription)
+                queue_entry = self.transcription_queue.get(timeout=1)
+                result = queue_entry[2]
                 result = f"\"{result}\""
                 
                 #self.progress_updated.emit(0, "processing")

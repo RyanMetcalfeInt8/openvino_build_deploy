@@ -19,7 +19,8 @@ class VADWorker(AsyncWorker):
             print(f"Change microphone sample rate to {mic_sample_rate}")
 
         sample_rate = 16000
-        samples_per_read = int(0.2 * sample_rate)  # 0.2 second = 200 ms
+        seconds_per_read = 0.2 # 0.2 second = 200 ms
+        samples_per_read = int(seconds_per_read * sample_rate)  
 
         config = sherpa_onnx.VadModelConfig()
         config.silero_vad.model = "models/silero_vad.onnx"
@@ -56,6 +57,9 @@ class VADWorker(AsyncWorker):
         print(f'VAD: Using default device: {devices[input_device_idx]["name"]}')
 
         print("VAD is now listening...")
+        
+        #absolute time in seconds
+        absolute_time = 0
         
         printed = False
         try:
@@ -101,8 +105,10 @@ class VADWorker(AsyncWorker):
                             inactivity_cachei = (inactivity_cachei + 1) % max_inactivity_cache_len
                         
                         to_transcribe_list += activity_cache
-                        
-                        self.result_queue.put(to_transcribe_list)
+ 
+                        segment_length_in_seconds = len(to_transcribe_list)*seconds_per_read
+                        start_time = absolute_time - segment_length_in_seconds
+                        self.result_queue.put((start_time, segment_length_in_seconds, to_transcribe_list,))
                         
                         #reset our caches
                         inactivity_cache = []
@@ -142,12 +148,16 @@ class WhisperWorker(AsyncWorker):
         
         while self._running.value:
             try:
-                to_transcribe_list = self.input_queue.get(timeout=1)
+                queue_entry = self.input_queue.get(timeout=1)
+                start_time = queue_entry[0]
+                segment_length = queue_entry[1]
+                to_transcribe_list = queue_entry[2]
+                
                 activity_array = np.concatenate(to_transcribe_list)
                 result = pipe.generate(activity_array, whisper_config)
                 transcription=str(result)
                 
-                self.result_queue.put(transcription)
+                self.result_queue.put((start_time, segment_length, transcription))
                 
                 print(transcription)
                 
