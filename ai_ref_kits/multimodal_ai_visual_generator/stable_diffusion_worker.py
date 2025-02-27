@@ -34,13 +34,18 @@ class StableDiffusionWorker(AsyncWorker):
     def _work_loop(self):
         import openvino_genai as ov_genai
         
+        width = 768
+        height = 432
+        
         print("Creating a stable diffusion pipeline to run on ", self.sd_device)
-        sd_pipe = ov_genai.Text2ImagePipeline(r"models/LCM_Dreamshaper_v7/FP16", self.sd_device)
+        sd_pipe = ov_genai.Text2ImagePipeline(r"models/LCM_Dreamshaper_v7/FP16")
+        sd_pipe.reshape(1, height, width, sd_pipe.get_generation_config().guidance_scale)
+        sd_pipe.compile(self.sd_device)
         
         print("Initializing Super Res Model to run on ", self.super_res_device)
         model_path_sr = Path(f"models/single-image-super-resolution-1033.xml")
         self.compiled_model, self.upsample_factor = superres_load(model_path_sr, self.super_res_device, 
-                                                                  h_custom=432, w_custom=768)
+                                                                  h_custom=height, w_custom=width)
 
         while self._running.value:
             try:
@@ -51,8 +56,8 @@ class StableDiffusionWorker(AsyncWorker):
                 t0 = time.time()
                 image_tensor = sd_pipe.generate(
                     prompt,
-                    width=768,
-                    height=432,
+                    width=width,
+                    height=height,
                     num_inference_steps=5,
                     num_images_per_prompt=1)
                 
