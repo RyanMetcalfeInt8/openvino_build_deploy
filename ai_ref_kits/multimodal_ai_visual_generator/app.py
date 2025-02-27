@@ -286,47 +286,10 @@ def main():
     Path("results").mkdir(exist_ok=True)
 
     app_params = {}
-
-    # creating the LLM pipeline
-
-    #print("Creating an llm pipeline to run on ", llm_device)
-
-    #llm_model_path = r"./models/llama-3.1-8b-instruct/INT4_compressed_weights"
-
-    #if llm_device == 'NPU':
-    #    pipeline_config = {"MAX_PROMPT_LEN": 1536}
-    #    llm_pipe = ov_genai.LLMPipeline(llm_model_path, llm_device, pipeline_config)
-    #else:
-    #    llm_pipe = ov_genai.LLMPipeline(llm_model_path, llm_device)
-
     app_params["llm_device"] = llm_device
-
-    #print("Done creating our llm..")
-
-    #print("Creating a stable diffusion pipeline to run on ", sd_device)
     app_params["sd_device"] = sd_device
     app_params["super_res_device"] = super_res_device
-
-    #sd_pipe = ov_genai.Text2ImagePipeline(r"models/LCM_Dreamshaper_v7/FP16", sd_device)
-
-    #app_params["sd"] = sd_pipe
-    #print("done creating the stable diffusion pipeline...")
-
     app_params["whisper_device"] = whisper_device
-
-    print("Initializing Super Res Model to run on ", super_res_device)
-    #model_path_sr = Path(f"models/single-image-super-resolution-1033.xml")  # realesrgan.xml")
-    #super_res_compiled_model, super_res_upsample_factor = superres_load(model_path_sr, super_res_device, h_custom=432,
-    #                                                                    w_custom=768)
-    #app_params["super_res_compiled_model"] = super_res_compiled_model
-    #app_params["super_res_upsample_factor"] = super_res_upsample_factor
-    #print("Initializing Super Res Model done...")
-
-    #print("Initializing Depth Anything v2 model to run on ", depth_anything_device)
-    #OV_DEPTH_ANYTHING_PATH = Path(f"models/depth_anything_v2_vits.xml")
-    #depth_compiled_model = core.compile_model(OV_DEPTH_ANYTHING_PATH, device_name=depth_anything_device)
-    #app_params["depth_compiled_model"] = depth_compiled_model
-    #print("Initializing Depth Anything v2 done...")
 
     print("Demo is ready!")
     window = MainWindow(app_params)
